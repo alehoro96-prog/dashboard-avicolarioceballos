@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avícola Río Ceballos</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Avícola RC">
+<meta name="application-name" content="Avícola RC">
+<link rel="apple-touch-icon" href="data:image/jpeg;base64,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">
+<link rel="icon" type="image/jpeg" href="data:image/jpeg;base64,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">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0f1117;--bg2:#181c27;--bg3:#1e2333;--border:#2a2f42;
+    --accent:#e8c547;--accent2:#3b82f6;--green:#4ade80;--red:#f87171;
+    --muted:#6b7280;--text:#e8eaf0;--text2:#9ca3b0;
+    --super:#a78bfa;--grande:#3b82f6;--mediano:#22c55e;--chico:#e8c547;
+    --bolita:#f97316;--pp:#ec4899;--cascado:#f87171;--sucio:#94a3b8;
+    --radius:12px;--radius-sm:8px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;font-size:14px;min-height:100vh}
+  .mono{font-family:'DM Mono',monospace}
+  .wrapper{max-width:1280px;margin:0 auto;padding:28px 24px}
+
+  /* Header */
+  .header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+  .header-left{display:flex;align-items:center;gap:14px}
+  .header-icon{width:44px;height:44px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+  .header-title{font-size:20px;font-weight:600;color:var(--text);letter-spacing:-.3px}
+  .header-sub{font-size:12px;color:var(--text2);margin-top:3px;font-weight:300}
+  .header-date{font-size:12px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 12px;font-family:'DM Mono',monospace;white-space:nowrap}
+
+  /* Tabs */
+  .tabs{display:flex;gap:4px;margin-bottom:20px}
+  .tab{padding:7px 18px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);color:var(--text2);background:transparent;transition:all .15s}
+  .tab:hover{color:var(--text);background:var(--bg3)}
+  .tab.active{background:var(--accent);color:#0f1117;border-color:var(--accent)}
+
+  /* Filter buttons B/C/Total */
+  .filter-btns{display:flex;gap:4px}
+  .ftab{padding:5px 14px;border-radius:var(--radius-sm);font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border);color:var(--text2);background:transparent;transition:all .15s}
+  .ftab:hover{color:var(--text);background:var(--bg3)}
+  .ftab.active{background:#6366f1;color:#fff;border-color:#6366f1}
+
+  /* Section labels */
+  .section-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:24px 0 12px}
+
+  /* KPI Grid */
+  .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .kpi-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .kpi{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;position:relative;overflow:hidden}
+  .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--kpi-color,var(--accent));border-radius:2px 2px 0 0}
+  .kpi-label{font-size:11px;color:var(--text2);margin-bottom:8px;font-weight:400;text-transform:uppercase;letter-spacing:.05em}
+  .kpi-value{font-size:30px;font-weight:600;color:var(--text);font-family:'DM Mono',monospace;line-height:1;letter-spacing:-1px}
+  .kpi-value span{font-size:14px;font-weight:400;color:var(--text2);margin-left:2px}
+  .kpi-sub{font-size:11px;color:var(--text2);margin-top:6px;line-height:1.5}
+  .kpi-sub b{color:var(--text);font-weight:500}
+  .kpi-sub .up{color:var(--green)}
+  .kpi-sub .down{color:var(--red)}
+
+  /* Cards */
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px}
+  .card-title{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
+
+  /* Bar chart */
+  .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .bar-row:last-child{margin-bottom:0}
+  .bar-cat{font-size:12px;color:var(--text);width:58px;flex-shrink:0;font-weight:500}
+  .bar-track{flex:1;background:var(--bg3);border-radius:4px;height:8px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:4px}
+  .bar-right{text-align:right;flex-shrink:0;width:108px}
+  .bar-val{font-size:13px;font-weight:500;color:var(--text);font-family:'DM Mono',monospace}
+  .bar-pct{font-size:10px;color:var(--text2);margin-top:1px}
+
+  /* Trend chart */
+  .trend-canvas-wrap{width:100%;position:relative}
+  .trend-canvas{width:100%;display:block;border-radius:4px}
+  .trend-labels{display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;flex-wrap:wrap;gap:2px}
+  .trend-labels span{white-space:nowrap}
+
+  /* Table */
+  .table-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  thead th{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding:6px 10px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap}
+  thead th:first-child{text-align:left}
+  tbody td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--bg3);color:var(--text);font-family:'DM Mono',monospace;font-size:12px;white-space:nowrap}
+  tbody td:first-child{text-align:left;font-family:'Sora',sans-serif;color:var(--text2)}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover td{background:var(--bg3)}
+  .c-green{color:var(--green)}
+  .c-red{color:var(--red)}
+  .c-accent{color:var(--accent);font-weight:600}
+  .c-warn{color:#facc15}
+
+  /* Placeholder */
+  .placeholder{background:var(--bg2);border:1px dashed var(--border);border-radius:var(--radius);padding:40px 20px;text-align:center;position:relative;overflow:hidden}
+  .placeholder::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(255,255,255,.01) 10px,rgba(255,255,255,.01) 20px)}
+  .ph-icon{font-size:32px;margin-bottom:10px;opacity:.4}
+  .ph-title{font-size:14px;font-weight:500;color:var(--text2)}
+  .ph-sub{font-size:11px;color:var(--muted);margin-top:5px}
+
+  /* Panel toggle */
+  .panel{display:none}
+  .panel.active{display:block}
+
+  @media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:600px){
+    .wrapper{padding:16px 12px}
+    .kpi-grid,.kpi-grid-2{grid-template-columns:1fr 1fr}
+    .kpi-value{font-size:22px}
+    .header{flex-direction:column;gap:10px}
+    .tabs{flex-wrap:wrap}
+    .tab{padding:6px 12px;font-size:11px}
+    .bar-right{width:90px}
+  }
+  @media(max-width:380px){
+    .kpi-grid,.kpi-grid-2{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="header-icon" style="background:white;padding:4px;overflow:hidden">
+        <img src="data:image/jpeg;base64,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" style="width:100%;height:100%;object-fit:contain;border-radius:6px" alt="Avícola Río Ceballos"/>
+      </div>
+      <div>
+        <div class="header-title">Avícola Río Ceballos</div>
+        <div class="header-sub">Panel de producción · Cajones (360 u.) y unidades</div>
+      </div>
+    </div>
+    <div class="header-date" id="current-date">Cargando...</div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loading-overlay" style="display:flex;align-items:center;justify-content:center;padding:60px 0;flex-direction:column;gap:12px">
+    <div style="width:36px;height:36px;border:3px solid #2a2f42;border-top-color:#e8c547;border-radius:50%;animation:spin 0.8s linear infinite"></div>
+    <div style="font-size:12px;color:#6b7280">Cargando datos desde Google Sheets...</div>
+  </div>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+  <!-- TABS (dinámicos) -->
+  <div class="tabs" id="dynamic-tabs" style="display:none"></div>
+
+  <!-- PANELS (dinámicos) -->
+  <div id="dynamic-panels"></div>
+
+  <!-- SENSORES VS CLASIFICADO -->
+  <div class="section-label" style="margin-top:28px">Diferencia conteo — sensores vs clasificado</div>
+  <div id="sensores-kpis" class="kpi-grid" style="margin-bottom:12px"></div>
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-title">Diferencia diaria en cajones (sensores − clasificado)</div>
+    <div id="sensores-chart-wrap" style="position:relative;width:100%;height:200px">
+      <canvas id="sensores-chart" role="img" aria-label="Línea de tendencia diferencia sensores vs clasificado"></canvas>
+    </div>
+    <div class="trend-labels" id="sensores-labels"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Registro diario — sensores vs clasificado</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th style="text-align:left">Fecha</th>
+          <th>Sensores (caj.)</th>
+          <th>Clasificado (caj.)</th>
+          <th>Diferencia (caj.)</th>
+          <th>Diferencia (u.)</th>
+          <th>% pérdida</th>
+        </tr></thead>
+        <tbody id="sensores-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div style="height:36px"></div>
+
+</div><!-- /wrapper -->
+
+<script>
+const SHEET_ID = '2PACX-1vQySZedeAsfxUZTzcrWdpH-AbYjXKucBLoAhyQKT_oE9TjEf5ak9ra2mV3frKs12vZ4GmOosGixdCoI';
+const CSV_DIRECT = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=0&single=true&output=csv`;
+const CSV_PROXY  = `https://corsproxy.io/?${encodeURIComponent(CSV_DIRECT)}`;
+
+const CAT_COLORS = {Super:'#a78bfa',Grande:'#3b82f6',Mediano:'#22c55e',Chico:'#e8c547',Bolita:'#f97316',PP:'#ec4899',Cascado:'#f87171',Sucio:'#94a3b8'};
+const CATS = ['Super','Grande','Mediano','Chico','Bolita','PP','Cascado','Sucio'];
+
+function fmt(n){ return n.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1}); }
+function u(n){ return Math.round(n*360).toLocaleString('es'); }
+
+// --- Parse CSV from Google Sheets ---
+function parseCSV(text){
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(c=>c.trim().replace(/^"|"$/g,''));
+  return lines.slice(1).map(line=>{
+    // Split respecting quoted fields
+    const cols = [];
+    let cur = '', inQ = false;
+    for(let i=0;i<line.length;i++){
+      const ch = line[i];
+      if(ch==='"'){ inQ=!inQ; }
+      else if(ch===',' && !inQ){ cols.push(cur); cur=''; }
+      else { cur+=ch; }
+    }
+    cols.push(cur);
+    const obj={};
+    headers.forEach((h,i)=>{
+      let v = (cols[i]||'').trim().replace(/^"|"$/g,'');
+      // Normalize decimal: if format is "1.234,56" convert to 1234.56
+      // if format is "1234,56" convert to 1234.56
+      if(/^\d{1,3}(\.\d{3})*(,\d+)?$/.test(v)){
+        v = v.replace(/\./g,'').replace(',','.');
+      } else if(/^\d+(,\d+)$/.test(v)){
+        v = v.replace(',','.');
+      }
+      obj[h]=v;
+    });
+    return obj;
+  });
+}
+
+function excelDateToStr(val){
+  const n = parseFloat(val);
+  if(!isNaN(n) && n > 40000){
+    const d = new Date(Math.round((n - 25569)*86400*1000));
+    const day = String(d.getUTCDate()).padStart(2,'0');
+    const mon = String(d.getUTCMonth()+1).padStart(2,'0');
+    const yr  = d.getUTCFullYear();
+    return {short: day+'/'+mon, mes: mon+'/'+yr, sortKey: yr+mon+day};
+  }
+  try {
+    const parts = val.split(/[-\/T ]/);
+    if(parts.length >= 3){
+      const yr = parts[0].length===4 ? parts[0] : parts[2];
+      const mo = parts[0].length===4 ? parts[1] : parts[1];
+      const dy = parts[0].length===4 ? parts[2].substring(0,2) : parts[0];
+      return {short: dy+'/'+mo, mes: mo+'/'+yr, sortKey: yr+mo+dy};
+    }
+  } catch(e){}
+  return {short: val, mes: '??', sortKey: '0'};
+}
+
+function processData(raw){
+  const daily = [];
+  raw.forEach(r=>{
+    const total = parseFloat(r['Suma Total (A+B)'])||0;
+    const totBlancoRaw = parseFloat(r['Total (A+B) Blanco'])||0;
+    const totColorRaw  = parseFloat(r['Total (A+B) Color'])||0;
+    const dt = excelDateToStr(r['Fecha']);
+    if(!dt || dt.short === '??') return;
+    if(total <= 0 && totBlancoRaw <= 0 && totColorRaw <= 0){
+      // Día sin ningún dato — igual lo incluimos para el promedio y el gráfico
+      if(!daily.find(d=>d.fecha===dt.short && d.mes===dt.mes)){
+        daily.push({fecha:dt.short, mes:dt.mes, sortKey:dt.sortKey, zeroDia:true,
+          Super:0,Grande:0,Mediano:0,Chico:0,Bolita:0,PP:0,Cascado:0,Sucio:0,
+          Super_B:0,Grande_B:0,Mediano_B:0,Chico_B:0,Bolita_B:0,PP_B:0,Cascado_B:0,Sucio_B:0,
+          Super_C:0,Grande_C:0,Mediano_C:0,Chico_C:0,Bolita_C:0,PP_C:0,Cascado_C:0,Sucio_C:0,
+          TotalA:0,TotalB:0,Total:0,TotalA_B:0,TotalB_B:0,Total_B:0,TotalA_C:0,TotalB_C:0,Total_C:0});
+      }
+      return;
+    }
+    // Tiene datos parciales (ej: solo Blanco o solo Color) — los leemos igual
+    const cats={}, catsB={}, catsC={};
+    CATS.forEach(c=>{
+      const b = parseFloat(r[c+' Blanco'])||0;
+      const co= parseFloat(r[c+' Color'])||0;
+      cats[c]  = Math.round((b+co)*100)/100;
+      catsB[c+'_B'] = Math.round(b*100)/100;
+      catsC[c+'_C'] = Math.round(co*100)/100;
+    });
+    if(cats.Cascado > 100) return; // skip outliers
+    const tA  = (parseFloat(r['SubtotalA Blanco'])||0)+(parseFloat(r['SubtotalA Color'])||0);
+    const tB  = (parseFloat(r['SubtotalB Blanco'])||0)+(parseFloat(r['SubtotalB Color'])||0);
+    const tAB = parseFloat(r['SubtotalA Blanco'])||0;
+    const tBB = parseFloat(r['SubtotalB Blanco'])||0;
+    const tAC = parseFloat(r['SubtotalA Color'])||0;
+    const tBC = parseFloat(r['SubtotalB Color'])||0;
+    const totB = (parseFloat(r['Total (A+B) Blanco'])||0);
+    const totC = (parseFloat(r['Total (A+B) Color'])||0);
+    daily.push({...cats,...catsB,...catsC, fecha:dt.short, mes:dt.mes, sortKey:dt.sortKey,
+      TotalA:Math.round(tA*100)/100,   TotalB:Math.round(tB*100)/100,   Total:Math.round(total*100)/100,
+      TotalA_B:Math.round(tAB*100)/100, TotalB_B:Math.round(tBB*100)/100, Total_B:Math.round(totB*100)/100,
+      TotalA_C:Math.round(tAC*100)/100, TotalB_C:Math.round(tBC*100)/100, Total_C:Math.round(totC*100)/100});
+  });
+  daily.sort((a,b)=>a.sortKey.localeCompare(b.sortKey));
+
+  // Monthly aggregation — Dias counts ALL days including zeros
+  const mmap={};
+  daily.forEach(r=>{
+    if(!mmap[r.mes]) mmap[r.mes]={mes:r.mes,
+      Total:0,TotalA:0,TotalB:0,Dias:0,
+      Total_B:0,TotalA_B:0,TotalB_B:0,
+      Total_C:0,TotalA_C:0,TotalB_C:0,
+      Super:0,Grande:0,Mediano:0,Chico:0,Bolita:0,PP:0,Cascado:0,Sucio:0,
+      Super_B:0,Grande_B:0,Mediano_B:0,Chico_B:0,Bolita_B:0,PP_B:0,Cascado_B:0,Sucio_B:0,
+      Super_C:0,Grande_C:0,Mediano_C:0,Chico_C:0,Bolita_C:0,PP_C:0,Cascado_C:0,Sucio_C:0};
+    const m=mmap[r.mes];
+    m.Dias++;
+    if(!r.zeroDia){
+      m.Total+=r.Total; m.TotalA+=r.TotalA; m.TotalB+=r.TotalB;
+      m.Total_B+=r.Total_B; m.TotalA_B+=r.TotalA_B; m.TotalB_B+=r.TotalB_B;
+      m.Total_C+=r.Total_C; m.TotalA_C+=r.TotalA_C; m.TotalB_C+=r.TotalB_C;
+      CATS.forEach(c=>{ m[c]+=r[c]; m[c+'_B']+=r[c+'_B']; m[c+'_C']+=r[c+'_C']; });
+    }
+  });
+  const monthly = Object.values(mmap).map(m=>{
+    const mesRows = daily.filter(r=>r.mes===m.mes).slice(-7);
+    const last7Total = mesRows.reduce((s,r)=>s+r.Total,0);
+    const r2 = v => Math.round(v*100)/100;
+    return {...m,
+      Total:r2(m.Total), TotalA:r2(m.TotalA), TotalB:r2(m.TotalB),
+      Total_B:r2(m.Total_B), TotalA_B:r2(m.TotalA_B), TotalB_B:r2(m.TotalB_B),
+      Total_C:r2(m.Total_C), TotalA_C:r2(m.TotalA_C), TotalB_C:r2(m.TotalB_C),
+      Promedio:r2(last7Total/7),
+      ...Object.fromEntries(CATS.flatMap(c=>[
+        [c,r2(m[c])],[c+'_B',r2(m[c+'_B'])],[c+'_C',r2(m[c+'_C'])]
+      ]))
+    };
+  });
+  monthly.sort((a,b)=>a.mes.localeCompare(b.mes));
+  return {daily, monthly};
+}
+
+// --- Loading state ---
+function setLoading(on){
+  document.getElementById('loading-overlay').style.display = on ? 'flex' : 'none';
+}
+
+// --- Update KPI panels dynamically ---
+function updatePanels(daily, monthly){
+  const byMes={};
+  monthly.forEach(m=>byMes[m.mes]=m);
+  const dailyByMes={};
+  daily.forEach(r=>{ if(!dailyByMes[r.mes]) dailyByMes[r.mes]=[]; dailyByMes[r.mes].push(r); });
+
+  // Update tabs dynamically
+  const tabsEl = document.getElementById('dynamic-tabs');
+  const panelsEl = document.getElementById('dynamic-panels');
+  tabsEl.innerHTML='';
+  panelsEl.innerHTML='';
+
+  monthly.slice().reverse().forEach((m,i)=>{
+    const id='panel-'+m.mes.replace('/','_');
+    const isFirst = i===0;
+    const rows=dailyByMes[m.mes]||[];
+    const lastRow=rows.filter(r=>!r.zeroDia).slice(-1)[0];
+
+    tabsEl.innerHTML+=`<button class="tab${isFirst?' active':''}" onclick="showPanel('${id}',this)">${m.mes}</button>`;
+
+    panelsEl.innerHTML+=`<div class="panel${isFirst?' active':''}" id="${id}" data-mes="${m.mes}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+        <div class="section-label" style="margin:0">${m.mes} — resumen del mes</div>
+        <div class="filter-btns" id="filter-${id}">
+          <button class="ftab active" onclick="setFilter('${id}','total',this)">Total</button>
+          <button class="ftab" onclick="setFilter('${id}','blanco',this)">Blanco</button>
+          <button class="ftab" onclick="setFilter('${id}','color',this)">Color</button>
+        </div>
+      </div>
+      <div id="kpis-${id}"></div>
+      <div class="section-label" style="margin-top:20px">Categorías — totales ${m.mes}</div>
+      <div class="card"><div class="card-title">Cajones por categoría en el mes</div><div id="bars-${id}"></div></div>
+      <div class="section-label">Evolución diaria — ${m.mes}</div>
+      <div class="card"><div class="card-title">Producción día por día</div>
+        <div class="trend-canvas-wrap"><div id="trend-${id}"></div></div>
+        <div class="trend-labels" id="labels-${id}"></div>
+      </div>
+      <div class="section-label">Detalle por jornada — ${m.mes}</div>
+      <div class="card"><div class="table-wrap"><table><thead><tr>
+        <th>Fecha</th><th>Super</th><th>Grande</th><th>Mediano</th><th>Chico</th>
+        <th>Bolita</th><th>PP</th><th>Cascado</th><th>Sucio</th>
+        <th>Total A</th><th>Total B</th><th>Total</th>
+      </tr></thead><tbody id="tbody-${id}"></tbody></table></div></div>
+    </div>`;
+  });
+
+  // "Todo" tab
+  tabsEl.innerHTML+=`<button class="tab" onclick="showPanel('panel-todo',this)">Todo el período</button>`;
+  const grandTotal=daily.reduce((s,r)=>s+r.Total,0);
+  const grandA=daily.reduce((s,r)=>s+r.TotalA,0);
+  const grandCasc=daily.reduce((s,r)=>s+r.Cascado,0);
+  const grandSucio=daily.reduce((s,r)=>s+r.Sucio,0);
+  panelsEl.innerHTML+=`<div class="panel" id="panel-todo">
+    <div class="section-label">Todo el período registrado</div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="kpi" style="--kpi-color:var(--accent)">
+        <div class="kpi-label">Total producción</div>
+        <div class="kpi-value">${fmt(grandTotal)} <span>caj.</span></div>
+        <div class="kpi-sub"><b>${u(grandTotal)} u.</b> totales</div>
+      </div>
+      <div class="kpi" style="--kpi-color:var(--green)">
+        <div class="kpi-label">Subtotal A — Aptos</div>
+        <div class="kpi-value">${fmt(grandA)} <span>caj.</span></div>
+        <div class="kpi-sub"><b class="up">${(grandA/grandTotal*100).toFixed(1)}%</b> del total</div>
+      </div>
+      <div class="kpi" style="--kpi-color:var(--cascado)">
+        <div class="kpi-label">Subtotal B — Cascado</div>
+        <div class="kpi-value">${fmt(grandCasc)} <span>caj.</span></div>
+        <div class="kpi-sub"><b class="down">${(grandCasc/grandTotal*100).toFixed(1)}%</b> del total</div>
+      </div>
+      <div class="kpi" style="--kpi-color:var(--sucio)">
+        <div class="kpi-label">Subtotal B — Sucio</div>
+        <div class="kpi-value">${fmt(grandSucio)} <span>caj.</span></div>
+        <div class="kpi-sub"><b class="down">${(grandSucio/grandTotal*100).toFixed(1)}%</b> del total</div>
+      </div>
+    </div>
+    <div class="section-label">Resumen mensual comparativo</div>
+    <div class="card"><div class="table-wrap"><table>
+      <thead><tr><th>Mes</th><th>Días</th><th>Total caj.</th><th>Total u.</th>
+        <th>Subtotal A</th><th>% A</th><th>Cascado</th><th>Sucio</th><th>% B</th><th>Prom. diario</th>
+      </tr></thead><tbody id="tbody-mensual"></tbody>
+    </table></div></div>
+    <div class="section-label">Evolución diaria — todo el período</div>
+    <div class="card"><div class="card-title">Producción día por día</div>
+      <div class="trend-canvas-wrap"><div id="trend-todo"></div></div>
+      <div class="trend-labels" id="labels-todo"></div>
+    </div>
+    <div class="section-label">Registro completo</div>
+    <div class="card"><div class="table-wrap"><table><thead><tr>
+      <th>Fecha</th><th>Super</th><th>Grande</th><th>Mediano</th><th>Chico</th>
+      <th>Bolita</th><th>PP</th><th>Cascado</th><th>Sucio</th>
+      <th>Total A</th><th>Total B</th><th>Total</th>
+    </tr></thead><tbody id="tbody-todo"></tbody></table></div></div>
+  </div>`;
+
+  // Render all content — table excludes zeros, trend includes them
+  monthly.forEach(m=>{
+    const id='panel-'+m.mes.replace('/','_');
+    const allRows = dailyByMes[m.mes]||[];
+    const prodRows = allRows.filter(r=>!r.zeroDia);
+    renderKPIs(id, m, prodRows, '', '');
+    renderBars('bars-'+id, m, '');
+    renderTable('tbody-'+id, prodRows, '');
+  });
+  renderTable('tbody-todo', daily.filter(r=>!r.zeroDia));
+  renderMonthlySummary(monthly);
+
+  // Last update badge
+  document.getElementById('current-date').textContent =
+    'Actualizado: ' + (daily[daily.length-1]?.fecha||'—');
+
+  // Trends after layout — include zero days so graph shows real dips
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    monthly.slice().reverse().forEach((m,i)=>{
+      const id='panel-'+m.mes.replace('/','_');
+      renderTrend('trend-'+id,'labels-'+id, dailyByMes[m.mes]||[]);
+    });
+    renderTrend('trend-todo','labels-todo', daily||[]);
+  }));
+}
+
+// --- Tab switching ---
+function showPanel(id, btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  const panel = document.getElementById(id);
+  if(panel) panel.classList.add('active');
+  if(btn) btn.classList.add('active');
+  requestAnimationFrame(()=>{
+    const trendEl = panel?.querySelector('[id^="trend-"]');
+    const labelsEl = panel?.querySelector('[id^="labels-"]');
+    if(!trendEl || !labelsEl) return;
+    if(trendEl.id === 'trend-todo'){
+      renderTrend('trend-todo', 'labels-todo', window._DAILY||[]);
+    } else {
+      const mesKey = trendEl.id.replace('trend-panel-','').replace(/_/,'/');
+      renderTrend(trendEl.id, labelsEl.id, window._dailyByMes?.[mesKey]||[]);
+    }
+  });
+}
+
+// --- Filter: Total / Blanco / Color ---
+function setFilter(panelId, mode, btn){
+  document.querySelectorAll(`#filter-${panelId} .ftab`).forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const panel = document.getElementById(panelId);
+  const mes = panel.dataset.mes;
+  const m = window._monthly?.find(x=>x.mes===mes);
+  const allRows = window._dailyByMes?.[mes]||[];
+  const prodRows = allRows.filter(r=>!r.zeroDia);
+  if(!m) return;
+  const sfx = mode==='blanco'?'_B': mode==='color'?'_C':'';
+  const label = mode==='blanco'?' — Blanco': mode==='color'?' — Color':'';
+  renderKPIs(panelId, m, prodRows, sfx, label);
+  renderBars('bars-'+panelId, m, sfx);
+  renderTable('tbody-'+panelId, prodRows, sfx);
+  renderTrend('trend-'+panelId,'labels-'+panelId, allRows, sfx);
+}
+
+function renderKPIs(panelId, m, rows, sfx, label){
+  const el = document.getElementById('kpis-'+panelId);
+  if(!el) return;
+  const tot   = m['Total'+sfx]||0;
+  const totA  = m['TotalA'+sfx]||0;
+  const casc  = m['Cascado'+sfx]||0;
+  const sucio = m['Sucio'+sfx]||0;
+  const lastRow = rows[rows.length-1];
+  const lastTot = lastRow ? (lastRow['Total'+sfx]||0) : 0;
+  const lastTotB= lastRow ? (lastRow['TotalB'+sfx]||0) : 0;
+  const pctA  = tot>0 ? (totA/tot*100).toFixed(1) : '0.0';
+  const pctCasc = tot>0 ? (casc/tot*100).toFixed(1) : '0.0';
+  const pctSucio= tot>0 ? (sucio/tot*100).toFixed(1) : '0.0';
+  // Promedio: últimos 7 días del mes incluyendo ceros
+  const allRows = window._dailyByMes?.[m.mes]||[];
+  const last7 = allRows.slice(-7);
+  const prom7 = last7.reduce((s,r)=>s+(r['Total'+sfx]||0),0)/7;
+  el.innerHTML=`
+    <div class="kpi-grid">
+      <div class="kpi" style="--kpi-color:var(--accent)">
+        <div class="kpi-label">Total del mes${label}</div>
+        <div class="kpi-value">${fmt(tot)} <span>caj.</span></div>
+        <div class="kpi-sub"><b>${u(tot)} u.</b> producidas en el mes</div>
+      </div>
+      <div class="kpi" style="--kpi-color:var(--accent2)">
+        <div class="kpi-label">Último día${lastRow?' ('+lastRow.fecha+')':''}</div>
+        <div class="kpi-value">${lastRow?fmt(lastTot):'—'} <span>caj.</span></div>
+        <div class="kpi-sub"><b>${lastRow?u(lastTot):'—'} u.</b> · B: <b class="c-red">${lastRow?fmt(lastTotB):'—'} caj.</b></div>
+      </div>
+      <div class="kpi" style="--kpi-color:var(--green)">
+        <div class="kpi-label">Promedio últ. 7 días${label}</div>
+        <div class="kpi-value">${fmt(Math.round(prom7*100)/100)} <span>caj.</span></div>
+        <div class="kpi-sub"><b>${u(Math.round(prom7*100)/100)} u.</b> · total mes: <b>${m.Dias} días</b></div>
+      </div>
+    </div>
+    <div class="kpi-grid" style="margin-top:12px">
+      <div class="kpi" style="--kpi-color:var(--green)">
+        <div class="kpi-label">Subtotal A — Aptos${label}</div>
+        <div class="kpi-value">${fmt(totA)} <span>caj.</span></div>
+        <div class="kpi-sub"><b class="up">${pctA}%</b> del total · <b>${u(totA)} u.</b></div>
+      </div>
+      <div class="kpi" style="--kpi-color:var(--cascado)">
+        <div class="kpi-label">Subtotal B — Cascado${label}</div>
+        <div class="kpi-value">${fmt(casc)} <span>caj.</span></div>
+        <div class="kpi-sub"><b class="down">${pctCasc}%</b> del total · <b>${u(casc)} u.</b></div>
+      </div>
+      <div class="kpi" style="--kpi-color:var(--sucio)">
+        <div class="kpi-label">Subtotal B — Sucio${label}</div>
+        <div class="kpi-value">${fmt(sucio)} <span>caj.</span></div>
+        <div class="kpi-sub"><b class="down">${pctSucio}%</b> del total · <b>${u(sucio)} u.</b></div>
+      </div>
+    </div>`;
+}
+function renderBars(containerId, monthData, sfx=''){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  const total = monthData['Total'+sfx]||0;
+  const maxVal = Math.max(...CATS.map(c=>monthData[c+(sfx?sfx:'')]||0), 1);
+  el.innerHTML = CATS.map(c=>{
+    const v = monthData[c+(sfx?sfx:'')]||0;
+    const pct = total>0?(v/total*100).toFixed(1):'0.0';
+    const w = (v/maxVal*100).toFixed(1);
+    return `<div class="bar-row">
+      <div class="bar-cat">${c}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${CAT_COLORS[c]}"></div></div>
+      <div class="bar-right"><div class="bar-val">${fmt(v)}</div><div class="bar-pct">${pct}% · ${u(v)} u.</div></div>
+    </div>`;
+  }).join('');
+}
+
+// --- Trend Chart (SVG responsive — funciona en iOS Safari) ---
+function renderTrend(containerId, labelsId, rows, sfx=''){
+  const wrap = document.getElementById(containerId);
+  const labelsEl = document.getElementById(labelsId);
+  if(!wrap || !rows.length) return;
+
+  const W = 500, H = 160, PT = 26, PB = 10, PL = 42, PR = 12;
+  const cW = W - PL - PR, cH = H - PT - PB;
+  const vals = rows.map(r => r['Total'+sfx]||r.Total||0);
+  const max = Math.max(...vals), min = Math.min(...vals);
+  const range = max - min || 1;
+  const n = vals.length;
+  const xOf = i => PL + (n===1 ? cW/2 : i/(n-1)*cW);
+  const yOf = v => PT + cH * (1 - (v-min)/range);
+
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="width:100%;display:block;overflow:visible">`;
+
+  // Grid lines + y labels
+  for(let i=0;i<=3;i++){
+    const v = min + range*i/3;
+    const y = yOf(v);
+    svg += `<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="#2a2f42" stroke-width="1"/>`;
+    svg += `<text x="${PL-4}" y="${y+3}" text-anchor="end" fill="#6b7280" font-size="9" font-family="monospace">${Math.round(v)}</text>`;
+  }
+
+  const pts = vals.map((v,i) => [xOf(i), yOf(v)]);
+
+  // Area fill
+  const aPath = pts.map((p,i)=>(i===0?`M${p[0]},${p[1]}`:`L${p[0]},${p[1]}`)).join(' ')
+    + ` L${pts[n-1][0]},${H-PB} L${pts[0][0]},${H-PB} Z`;
+  svg += `<path d="${aPath}" fill="rgba(232,197,71,0.08)"/>`;
+
+  // Line
+  const lPath = pts.map((p,i)=>(i===0?`M${p[0]},${p[1]}`:`L${p[0]},${p[1]}`)).join(' ');
+  svg += `<path d="${lPath}" fill="none" stroke="#e8c547" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+
+  // Dots + labels
+  pts.forEach(([x,y],i) => {
+    const isZero = vals[i] === 0;
+    const isHigh = vals[i] >= 600;
+    const col = isZero ? '#1e2333' : isHigh ? '#4ade80' : '#e8c547';
+    const stroke = isZero ? '#6b7280' : '#0f1117';
+    const rad = isZero ? 3 : isHigh ? 5 : 3.5;
+    svg += `<circle cx="${x}" cy="${y}" r="${rad}" fill="${col}" stroke="${stroke}" stroke-width="2"/>`;
+    if(!isZero){
+      svg += `<text x="${x}" y="${y-10}" text-anchor="middle" fill="${isHigh?'#4ade80':'#9ca3b0'}" font-size="${isHigh?10:9}" font-family="monospace" font-weight="${isHigh?'bold':'normal'}">${vals[i].toFixed(0)}</text>`;
+    }
+  });
+
+  svg += '</svg>';
+  wrap.innerHTML = svg;
+
+  // X labels
+  labelsEl.innerHTML = '';
+  rows.forEach(r => {
+    const s = document.createElement('span');
+    s.textContent = r.fecha;
+    labelsEl.appendChild(s);
+  });
+}
+
+// --- Table rows ---
+function renderTable(tbodyId, rows, sfx=''){
+  const el=document.getElementById(tbodyId);
+  if(!el) return;
+  const g = (r,c) => r[c+(sfx?sfx:'')] ?? r[c] ?? 0;
+  el.innerHTML=[...rows].reverse().map(r=>`<tr>
+    <td>${r.fecha}</td>
+    <td>${fmt(g(r,'Super'))}<br><span style="font-size:10px;color:#6b7280">${u(g(r,'Super'))} u.</span></td>
+    <td>${fmt(g(r,'Grande'))}<br><span style="font-size:10px;color:#6b7280">${u(g(r,'Grande'))} u.</span></td>
+    <td>${fmt(g(r,'Mediano'))}<br><span style="font-size:10px;color:#6b7280">${u(g(r,'Mediano'))} u.</span></td>
+    <td>${fmt(g(r,'Chico'))}<br><span style="font-size:10px;color:#6b7280">${u(g(r,'Chico'))} u.</span></td>
+    <td>${fmt(g(r,'Bolita'))}<br><span style="font-size:10px;color:#6b7280">${u(g(r,'Bolita'))} u.</span></td>
+    <td>${fmt(g(r,'PP'))}<br><span style="font-size:10px;color:#6b7280">${u(g(r,'PP'))} u.</span></td>
+    <td>${fmt(g(r,'Cascado'))}<br><span style="font-size:10px;color:#6b7280">${u(g(r,'Cascado'))} u.</span></td>
+    <td>${fmt(g(r,'Sucio'))}<br><span style="font-size:10px;color:#6b7280">${u(g(r,'Sucio'))} u.</span></td>
+    <td class="c-green">${fmt(g(r,'TotalA'))}</td>
+    <td class="c-red">${fmt(g(r,'TotalB'))}</td>
+    <td class="c-accent">${fmt(g(r,'Total'))}</td>
+  </tr>`).join('');
+}
+
+// --- Monthly summary table ---
+function renderMonthlySummary(monthly){
+  const el=document.getElementById('tbody-mensual');
+  if(!el) return;
+  el.innerHTML=monthly.map(m=>{
+    const pctA=(m.TotalA/m.Total*100).toFixed(1);
+    const pctB=(m.TotalB/m.Total*100).toFixed(1);
+    return `<tr>
+      <td>${m.mes}</td>
+      <td>${m.Dias}</td>
+      <td class="c-accent">${fmt(m.Total)}</td>
+      <td>${u(m.Total)}</td>
+      <td class="c-green">${fmt(m.TotalA)}</td>
+      <td class="c-green">${pctA}%</td>
+      <td class="c-red">${fmt(m.Cascado)}</td>
+      <td class="c-red">${fmt(m.Sucio)}</td>
+      <td class="c-red">${pctB}%</td>
+      <td>${fmt(m.Promedio)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// --- INIT: fetch CSV, try direct then proxy ---
+function loadData(url, bust){
+  const finalUrl = bust ? url + '&_t=' + Date.now() : url;
+  return fetch(finalUrl, {cache: 'no-store'})
+    .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); });
+}
+
+loadData(CSV_DIRECT, true)
+  .catch(()=> loadData(CSV_PROXY, false))
+  .then(text=>{
+    const raw = parseCSV(text);
+    const {daily, monthly} = processData(raw);
+    window._DAILY = daily;
+    window._monthly = monthly;
+    window._dailyByMes = {};
+    daily.forEach(r=>{ if(!window._dailyByMes[r.mes]) window._dailyByMes[r.mes]=[]; window._dailyByMes[r.mes].push(r); });
+    setLoading(false);
+    document.getElementById('dynamic-tabs').style.display='flex';
+    updatePanels(daily, monthly);
+  })
+  .catch(err=>{
+    document.getElementById('loading-overlay').innerHTML=
+      `<div style="text-align:center;padding:40px">
+        <div style="font-size:24px;margin-bottom:12px">⚠️</div>
+        <div style="color:#f87171;font-size:13px;margin-bottom:8px">No se pudieron cargar los datos</div>
+        <div style="color:#6b7280;font-size:11px">Verificá tu conexión a internet y que la planilla esté publicada</div>
+        <div style="color:#6b7280;font-size:10px;margin-top:6px">${err.message}</div>
+      </div>`;
+  });
+
+// ---- SENSORES VS CLASIFICADO ----
+const SENSORS_CSV    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQySZedeAsfxUZTzcrWdpH-AbYjXKucBLoAhyQKT_oE9TjEf5ak9ra2mV3frKs12vZ4GmOosGixdCoI/pub?gid=526269754&single=true&output=csv';
+const SENSORS_PROXY  = 'https://corsproxy.io/?' + encodeURIComponent(SENSORS_CSV);
+
+function parseSensorsCSV(text){
+  const lines = text.trim().split('\n');
+  const rows = [];
+  lines.slice(1).forEach(line=>{
+    const cols=[];let cur='',inQ=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){inQ=!inQ;}else if(ch===','&&!inQ){cols.push(cur);cur='';}else{cur+=ch;}
+    }
+    cols.push(cur);
+    const norm=v=>parseFloat((v||'').trim().replace(/\./g,'').replace(',','.'))||0;
+    const fecha=(cols[0]||'').trim();
+    const sensores=norm(cols[1]);
+    const clasificado=norm(cols[2]);
+    const diferencia=norm(cols[3])||Math.round((sensores-clasificado)*100)/100;
+    if(!fecha||sensores<=0) return;
+    rows.push({fecha,sensores,clasificado,diferencia});
+  });
+  return rows;
+}
+
+function renderSensors(rows){
+  if(!rows.length) return;
+  const avg = rows.reduce((s,r)=>s+r.diferencia,0)/rows.length;
+  const last = rows[rows.length-1];
+  const last7 = rows.slice(-7);
+  const avg7 = last7.reduce((s,r)=>s+r.diferencia,0)/7;
+
+  // KPIs
+  const kpisEl = document.getElementById('sensores-kpis');
+  if(kpisEl) kpisEl.innerHTML=`
+    <div class="kpi" style="--kpi-color:var(--red)">
+      <div class="kpi-label">Último día (${last.fecha})</div>
+      <div class="kpi-value">${fmt(last.diferencia)} <span>caj.</span></div>
+      <div class="kpi-sub"><b>${u(last.diferencia)} u.</b> · <b class="c-red">${last.sensores>0?(last.diferencia/last.sensores*100).toFixed(1):0}% pérdida</b></div>
+    </div>
+    <div class="kpi" style="--kpi-color:var(--accent2)">
+      <div class="kpi-label">Promedio últ. 7 días</div>
+      <div class="kpi-value">${fmt(Math.round(avg7*100)/100)} <span>caj.</span></div>
+      <div class="kpi-sub"><b>${u(Math.round(avg7*100)/100)} u.</b> pérdida diaria</div>
+    </div>
+    <div class="kpi" style="--kpi-color:var(--muted)">
+      <div class="kpi-label">Promedio general</div>
+      <div class="kpi-value">${fmt(Math.round(avg*100)/100)} <span>caj.</span></div>
+      <div class="kpi-sub">sobre <b>${rows.length} días</b> registrados</div>
+    </div>`;
+
+  // Table
+  const tbody = document.getElementById('sensores-tbody');
+  if(tbody) tbody.innerHTML=[...rows].reverse().map(r=>{
+    const pct=r.sensores>0?(r.diferencia/r.sensores*100).toFixed(1):0;
+    const hi=r.diferencia>avg*1.5;
+    return `<tr>
+      <td>${r.fecha}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace">${fmt(r.sensores)}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace" class="c-green">${fmt(r.clasificado)}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace" class="${hi?'c-red':'c-accent'}">${fmt(r.diferencia)}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace;color:var(--color-text-secondary)">${u(r.diferencia)}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace" class="${parseFloat(pct)>3?'c-red':''}">${pct}%</td>
+    </tr>`;
+  }).join('');
+
+  // Chart with Chart.js
+  const wrap = document.getElementById('sensores-chart-wrap');
+  const canvas = document.getElementById('sensores-chart');
+  if(!wrap||!canvas) return;
+  const W = wrap.offsetWidth||600;
+  const H = 200;
+  const dpr = window.devicePixelRatio||1;
+  canvas.width=W*dpr; canvas.height=H*dpr;
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  new Chart(canvas,{
+    type:'line',
+    data:{
+      labels:rows.map(r=>r.fecha),
+      datasets:[
+        {label:'Diferencia',data:rows.map(r=>r.diferencia),
+          borderColor:'#f87171',backgroundColor:'rgba(248,113,113,0.08)',
+          tension:.4,fill:true,borderWidth:2,
+          pointRadius:4,pointBorderWidth:1.5,pointBorderColor:'#0f1117',
+          pointBackgroundColor:rows.map(r=>r.diferencia>avg*1.5?'#f87171':'#e8c547')},
+        {label:'Promedio',data:rows.map(()=>Math.round(avg*10)/10),
+          borderColor:'rgba(99,102,241,0.6)',borderDash:[5,5],
+          borderWidth:1.5,pointRadius:0,fill:false}
+      ]
+    },
+    options:{
+      responsive:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)} caj. (${u(ctx.parsed.y)} u.)`}}
+      },
+      scales:{
+        x:{ticks:{font:{size:10},color:'#9ca3b0',maxRotation:45,autoSkip:true,maxTicksLimit:14},grid:{display:false},border:{display:false}},
+        y:{ticks:{font:{size:10},color:'#9ca3b0',maxTicksLimit:5},grid:{color:'rgba(150,150,150,0.1)'},border:{display:false}}
+      }
+    }
+  });
+}
+
+// Load Chart.js then fetch sensors
+const _cs = document.createElement('script');
+_cs.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js';
+_cs.onload = ()=>{
+  loadData(SENSORS_CSV, true)
+    .catch(()=>loadData(SENSORS_PROXY, false))
+    .then(text=>{ const rows=parseSensorsCSV(text); requestAnimationFrame(()=>requestAnimationFrame(()=>renderSensors(rows))); })
+    .catch(err=>{ if(document.getElementById('sensores-kpis')) document.getElementById('sensores-kpis').innerHTML=`<div style="color:#f87171;font-size:12px;padding:8px">Error cargando sensores: ${err.message}</div>`; });
+};
+document.head.appendChild(_cs);
+</script>
+</body>
+</html>
