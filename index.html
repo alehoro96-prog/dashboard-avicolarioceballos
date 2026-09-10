@@ -144,17 +144,18 @@
   </div>
   <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 
-  <!-- TABS (dinámicos) -->
-  <div class="tabs" id="dynamic-tabs" style="display:none"></div>
-
-  <!-- PANELS (dinámicos) -->
-  <div id="dynamic-panels"></div>
-
-  <!-- TABS FIJOS: Postura / Población / Sensores (independientes de la carga de clasificado) -->
-  <div class="tabs" style="margin-top:-12px">
+  <!-- TABS FIJOS: Postura / Población / Sensores (independientes de la carga de clasificado, siempre arriba de todo) -->
+  <div class="tabs">
     <button class="tab" onclick="showPanel('panel-postura', this)">Postura</button>
     <button class="tab" onclick="showPanel('panel-poblacion', this)">Población</button>
     <button class="tab" onclick="showPanel('panel-sensores', this)">Sensores</button>
+    <button class="tab active" onclick="showPanel('panel-clasificado', this)">Clasificado</button>
+  </div>
+
+  <!-- PANEL: CLASIFICADO (contenido mensual existente, con su propia sub-navegación) -->
+  <div class="panel active" id="panel-clasificado">
+    <div class="tabs" id="dynamic-tabs" style="display:none"></div>
+    <div id="dynamic-panels"></div>
   </div>
 
   <!-- PANEL: POSTURA -->
@@ -165,7 +166,8 @@
     <div class="section-label">Registro diario por galpón</div>
     <div class="card"><div class="table-wrap"><table><thead><tr>
       <th style="text-align:left">Fecha</th><th style="text-align:left">Galpón</th>
-      <th>Huevos</th><th>Población vigente</th><th>% Postura</th><th>Δ vs ayer</th><th>Δ vs semana pasada</th>
+      <th>Huevos</th><th>Población vigente</th><th>% Postura (día)</th><th>Δ vs ayer</th>
+      <th>% Postura (semana)</th><th>Δ vs semana anterior</th>
     </tr></thead><tbody id="postura-tbody"></tbody></table></div></div>
     <div style="height:12px"></div>
   </div>
@@ -810,7 +812,8 @@ function renderSensors(rows){
   const dpr = window.devicePixelRatio||1;
   canvas.width=W*dpr; canvas.height=H*dpr;
   canvas.style.width=W+'px'; canvas.style.height=H+'px';
-  new Chart(canvas,{
+  if(window._sensoresChart){ window._sensoresChart.destroy(); }
+  window._sensoresChart = new Chart(canvas,{
     type:'line',
     data:{
       labels:rows.map(r=>r.fecha),
@@ -902,19 +905,6 @@ function loadPosturaData(){
   });
 }
 
-function addDays(iso, days){
-  const d = new Date(iso+'T00:00:00Z');
-  d.setUTCDate(d.getUTCDate()+days);
-  return d.toISOString().slice(0,10);
-}
-function pctDelta(curr, prev){
-  if(prev==null || prev===0) return null;
-  return (curr-prev)/prev*100;
-}
-function findByDate(serie, fecha){
-  return serie.find(p=>p.fecha===fecha) || null;
-}
-
 function poblacionVigente(galpon, fecha, poblacionMap, mortandadList){
   const key = galponKey(galpon);
   const p = poblacionMap[key];
@@ -926,6 +916,28 @@ function poblacionVigente(galpon, fecha, poblacionMap, mortandadList){
     .filter(m=>galponKey(m.Galpon)===key && normDate(m.Fecha)>=fechaAlta && normDate(m.Fecha)<=fechaNorm)
     .reduce((s,m)=>s+(parseFloat(m.Muertas)||0),0);
   return Math.max(inicial - muertas, 0);
+}
+
+// Día de la semana (0=domingo) de una fecha "YYYY-MM-DD"
+function dowOf(fechaISO){
+  return new Date(fechaISO + 'T00:00:00').getDay();
+}
+
+// Busca el punto válido (con % postura calculado) más cercano ANTES de idx, saltando
+// los domingos excluidos (Kajoo no separa el conteo del domingo, va sumado al lunes).
+function prevValidPt(serie, idx){
+  for(let j=idx-1; j>=0; j--){ if(serie[j].pct!=null) return serie[j]; }
+  return null;
+}
+
+// Promedio de % postura de los últimos 7 puntos hasta idx (inclusive), y de los 7 anteriores a esos.
+function weekStats(serie, idx){
+  const win = serie.slice(Math.max(0,idx-6), idx+1).filter(p=>p.pct!=null);
+  const avg = win.length ? win.reduce((s,p)=>s+p.pct,0)/win.length : null;
+  const prevWin = serie.slice(Math.max(0,idx-13), Math.max(0,idx-6)).filter(p=>p.pct!=null);
+  const prevAvg = prevWin.length ? prevWin.reduce((s,p)=>s+p.pct,0)/prevWin.length : null;
+  const delta = (avg!=null && prevAvg!=null) ? (avg-prevAvg) : null;
+  return {avg, prevAvg, delta};
 }
 
 function renderPostura(postura, mortandad, poblacion){
@@ -948,35 +960,55 @@ function renderPostura(postura, mortandad, poblacion){
 
   galpones.forEach(g=>{
     const serie = byGalpon[g];
+    // Adjuntar población vigente y % postura a cada punto de la serie.
+    // Kajoo no separa el conteo del domingo: ese día siempre da 0 y el lunes trae
+    // domingo+lunes sumados. Por eso el domingo se excluye de % postura / deltas /
+    // promedios / alertas (no es una caída real), y el lunes usa la MITAD del total
+    // como valor "efectivo" del día para poder compararlo con un día normal. El total
+    // crudo (huevos) se sigue mostrando tal cual en la tabla y en la tarjeta.
+    serie.forEach(pt=>{
+      pt.poblacion = poblacionVigente(g, pt.fecha, poblacionMap, mortandad);
+      const d = dowOf(pt.fecha);
+      pt.esDomingo = (d === 0);
+      pt.esLunes = (d === 1);
+      pt.huevosEfectivo = pt.esDomingo ? null : (pt.esLunes ? pt.huevos/2 : pt.huevos);
+      pt.pct = (pt.poblacion && pt.huevosEfectivo!=null) ? (pt.huevosEfectivo/pt.poblacion*100) : null;
+    });
+
     serie.forEach((pt,i)=>{
-      const pobl = poblacionVigente(g, pt.fecha, poblacionMap, mortandad);
-      const pct = pobl ? (pt.huevos/pobl*100) : null;
-      const prev = serie[i-1];
-      const deltaPct = prev ? pctDelta(pt.huevos, prev.huevos) : null;
-      const prevSemana = findByDate(serie, addDays(pt.fecha, -7));
-      const deltaSemPct = prevSemana ? pctDelta(pt.huevos, prevSemana.huevos) : null;
-      rows.push({fecha:pt.fecha, galpon:g, huevos:pt.huevos, poblacion:pobl, pct, deltaPct, deltaSemPct});
+      const prev = prevValidPt(serie, i);
+      const deltaDiaPts = (prev && pt.pct!=null) ? (pt.pct-prev.pct) : null;
+      const wk = weekStats(serie, i);
+      rows.push({fecha:pt.fecha, galpon:g, huevos:pt.huevos, poblacion:pt.poblacion, pct:pt.pct,
+        deltaDiaPts, weekAvgPct:wk.avg, deltaSemanaPts:wk.delta, esDomingo:pt.esDomingo, esLunes:pt.esLunes});
     });
 
     const last = serie[serie.length-1];
-    const prev3 = serie.slice(-4,-1);
-    const avg3 = prev3.length ? prev3.reduce((s,r)=>s+r.huevos,0)/prev3.length : null;
-    const pobl = last ? poblacionVigente(g, last.fecha, poblacionMap, mortandad) : null;
-    const pct = (last && pobl) ? (last.huevos/pobl*100) : null;
-    const prevDia = last ? serie[serie.length-2] : null;
-    const deltaDiaPct = (last && prevDia) ? pctDelta(last.huevos, prevDia.huevos) : null;
-    const prevSemanaLast = last ? findByDate(serie, addDays(last.fecha, -7)) : null;
-    const deltaSemPct = (last && prevSemanaLast) ? pctDelta(last.huevos, prevSemanaLast.huevos) : null;
+    const prevDia = prevValidPt(serie, serie.length-1);
+    const deltaDiaPts = (last && last.pct!=null && prevDia) ? (last.pct-prevDia.pct) : null;
+    const wkLast = weekStats(serie, serie.length-1);
+
+    // Promedio de referencia para la alerta: últimos 3 puntos VÁLIDOS (no domingo)
+    // anteriores al último, usando el valor efectivo (lunes ya dividido por 2).
+    const validPrev = [];
+    for(let j=serie.length-2; j>=0 && validPrev.length<3; j--){
+      if(serie[j].huevosEfectivo!=null) validPrev.unshift(serie[j]);
+    }
+    const avg3 = validPrev.length ? validPrev.reduce((s,r)=>s+r.huevosEfectivo,0)/validPrev.length : null;
     let alerta = false, caidaPct = null;
-    if(last && avg3 && avg3>0){
-      caidaPct = (avg3-last.huevos)/avg3*100;
+    if(last && last.huevosEfectivo!=null && avg3 && avg3>0){
+      caidaPct = (avg3-last.huevosEfectivo)/avg3*100;
       if(caidaPct >= ALERT_DROP_PCT) alerta = true;
     }
     if(alerta){
-      alerts.push({galpon:g, fecha:last.fecha, caidaPct, huevos:last.huevos, avg3});
+      alerts.push({galpon:g, fecha:last.fecha, caidaPct, huevos:last.huevosEfectivo, avg3, esLunes:last.esLunes});
     }
 
-    galponCards.push({galpon:g, huevos:last?last.huevos:0, pct, alerta, deltaDiaPct, deltaSemPct});
+    galponCards.push({
+      galpon:g, huevos:last?last.huevos:0, pctHoy:last?last.pct:null,
+      deltaDiaPts, weekAvgPct:wkLast.avg, deltaSemanaPts:wkLast.delta, alerta,
+      esDomingo:last?last.esDomingo:false, esLunes:last?last.esLunes:false
+    });
   });
 
   const alertEl = document.getElementById('postura-alert');
@@ -985,7 +1017,7 @@ function renderPostura(postura, mortandad, poblacion){
       alertEl.innerHTML = `<div class="card" style="border-color:var(--red);background:rgba(248,113,113,0.08);margin-bottom:16px">
         <div class="card-title" style="color:var(--red)">⚠ Alerta de caída de postura</div>
         ${alerts.map(a=>`<div style="font-size:13px;margin-bottom:6px">
-          <b>${galponLabel(a.galpon)}</b>: ${fmtInt(a.huevos)} huevos el ${a.fecha} — <span class="c-red">${a.caidaPct.toFixed(1)}% por debajo</span> del promedio de los 3 días previos (${fmtInt(a.avg3)}).
+          <b>${galponLabel(a.galpon)}</b>: ${fmtInt(a.huevos)} huevos${a.esLunes?' (mitad del total domingo+lunes)':''} el ${a.fecha} — <span class="c-red">${a.caidaPct.toFixed(1)}% por debajo</span> del promedio de los 3 días previos (${fmtInt(a.avg3)}).
         </div>`).join('')}
       </div>`;
     } else {
@@ -993,10 +1025,11 @@ function renderPostura(postura, mortandad, poblacion){
     }
   }
 
-  function deltaSpan(pct){
-    if(pct==null) return '<span style="color:var(--muted)">—</span>';
-    const cls = pct<= -ALERT_DROP_PCT ? 'c-red' : pct<0 ? 'c-warn' : 'c-green';
-    const txt = (pct>=0?'+':'')+pct.toFixed(1)+'%';
+  // Diferencia en PUNTOS porcentuales de postura (no % relativo)
+  function ptsSpan(pts){
+    if(pts==null) return '<span style="color:var(--muted)">—</span>';
+    const cls = pts<= -ALERT_DROP_PCT ? 'c-red' : pts<0 ? 'c-warn' : 'c-green';
+    const txt = (pts>=0?'+':'')+pts.toFixed(1)+' pts';
     return `<span class="${cls}">${txt}</span>`;
   }
 
@@ -1004,11 +1037,15 @@ function renderPostura(postura, mortandad, poblacion){
   if(galEl){
     galEl.innerHTML = galponCards.map(c=>{
       const color = c.alerta ? 'var(--red)' : 'var(--accent)';
+      const valorHoy = c.esDomingo
+        ? '<span style="font-size:15px;color:var(--muted)">sin conteo (domingo)</span>'
+        : (c.pctHoy!=null?c.pctHoy.toFixed(1)+'%':'—');
+      const notaLunes = c.esLunes ? ' <span style="color:var(--muted);font-size:11px">(dom+lun, mitad)</span>' : '';
       return `<div class="kpi" style="--kpi-color:${color}">
         <div class="kpi-label">${galponLabel(c.galpon)}${c.alerta?' ⚠':''}</div>
-        <div class="kpi-value">${fmtInt(c.huevos)} <span>huevos</span></div>
-        <div class="kpi-sub">${c.pct!=null? '<b>'+c.pct.toFixed(1)+'%</b> postura' : 'sin población cargada'}</div>
-        <div class="kpi-sub">día: ${deltaSpan(c.deltaDiaPct)} · semana: ${deltaSpan(c.deltaSemPct)}</div>
+        <div class="kpi-value">${valorHoy} <span>postura hoy${notaLunes}</span></div>
+        <div class="kpi-sub">${fmtInt(c.huevos)} huevos · día: ${ptsSpan(c.deltaDiaPts)}</div>
+        <div class="kpi-sub">semana: <b>${c.weekAvgPct!=null?c.weekAvgPct.toFixed(1)+'%':'—'}</b> prom. · ${ptsSpan(c.deltaSemanaPts)}</div>
       </div>`;
     }).join('');
   }
@@ -1016,14 +1053,17 @@ function renderPostura(postura, mortandad, poblacion){
   const tbody = document.getElementById('postura-tbody');
   if(tbody){
     tbody.innerHTML = [...rows].sort((a,b)=> b.fecha.localeCompare(a.fecha) || a.galpon.localeCompare(b.galpon)).slice(0,200).map(r=>{
+      const nota = r.esDomingo ? ' <span style="color:var(--muted);font-size:10px">(dom, sin conteo)</span>'
+        : r.esLunes ? ' <span style="color:var(--muted);font-size:10px">(dom+lun)</span>' : '';
       return `<tr>
-        <td>${r.fecha}</td>
+        <td>${r.fecha}${nota}</td>
         <td style="text-align:left">${galponLabel(r.galpon)}</td>
         <td>${fmtInt(r.huevos)}</td>
         <td>${r.poblacion!=null?fmtInt(r.poblacion):'—'}</td>
         <td>${r.pct!=null?r.pct.toFixed(1)+'%':'—'}</td>
-        <td>${deltaSpan(r.deltaPct)}</td>
-        <td>${deltaSpan(r.deltaSemPct)}</td>
+        <td>${ptsSpan(r.deltaDiaPts)}</td>
+        <td>${r.weekAvgPct!=null?r.weekAvgPct.toFixed(1)+'%':'—'}</td>
+        <td>${ptsSpan(r.deltaSemanaPts)}</td>
       </tr>`;
     }).join('');
   }
