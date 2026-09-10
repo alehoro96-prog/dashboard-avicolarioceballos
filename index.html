@@ -150,6 +150,41 @@
   <!-- PANELS (dinámicos) -->
   <div id="dynamic-panels"></div>
 
+  <!-- TABS FIJOS: Postura / Población (independientes de la carga de clasificado) -->
+  <div class="tabs" style="margin-top:-12px">
+    <button class="tab" onclick="showPanel('panel-postura', this)">Postura</button>
+    <button class="tab" onclick="showPanel('panel-poblacion', this)">Población</button>
+  </div>
+
+  <!-- PANEL: POSTURA -->
+  <div class="panel" id="panel-postura">
+    <div id="postura-alert"></div>
+    <div class="section-label" style="margin-top:0">Postura — resumen de hoy</div>
+    <div id="postura-kpis" class="kpi-grid" style="margin-bottom:12px"></div>
+    <div class="section-label">Por galpón</div>
+    <div id="postura-galpones" class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px"></div>
+    <div class="section-label">Registro diario por galpón</div>
+    <div class="card"><div class="table-wrap"><table><thead><tr>
+      <th style="text-align:left">Fecha</th><th style="text-align:left">Galpón</th>
+      <th>Huevos</th><th>Población vigente</th><th>% Postura</th><th>Δ vs ayer</th>
+    </tr></thead><tbody id="postura-tbody"></tbody></table></div></div>
+    <div style="height:12px"></div>
+  </div>
+
+  <!-- PANEL: POBLACIÓN -->
+  <div class="panel" id="panel-poblacion">
+    <div class="section-label" style="margin-top:0">Población vigente por galpón</div>
+    <div class="card" style="margin-bottom:12px"><div class="table-wrap"><table><thead><tr>
+      <th style="text-align:left">Galpón</th><th style="text-align:left">Fecha alta</th>
+      <th>Población inicial</th><th>Mortandad acum.</th><th>Población vigente</th><th>% mortandad</th>
+    </tr></thead><tbody id="poblacion-tbody"></tbody></table></div></div>
+    <div class="section-label">Mortandad — últimos registros</div>
+    <div class="card"><div class="table-wrap"><table><thead><tr>
+      <th style="text-align:left">Fecha</th><th style="text-align:left">Galpón</th><th>Muertas</th>
+    </tr></thead><tbody id="mortandad-tbody"></tbody></table></div></div>
+    <div style="height:12px"></div>
+  </div>
+
   <!-- SENSORES VS CLASIFICADO -->
   <div class="section-label" style="margin-top:28px">Diferencia conteo — sensores vs clasificado</div>
   <div id="sensores-kpis" class="kpi-grid" style="margin-bottom:12px"></div>
@@ -190,6 +225,7 @@ const CATS = ['Super','Grande','Mediano','Chico','Bolita','PP','Cascado','Sucio'
 
 function fmt(n){ return n.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1}); }
 function u(n){ return Math.round(n*360).toLocaleString('es'); }
+function fmtInt(n){ return Math.round(n||0).toLocaleString('es'); }
 
 // --- Parse CSV from Google Sheets ---
 function parseCSV(text){
@@ -807,6 +843,221 @@ _cs.onload = ()=>{
     .catch(err=>{ if(document.getElementById('sensores-kpis')) document.getElementById('sensores-kpis').innerHTML=`<div style="color:#f87171;font-size:12px;padding:8px">Error cargando sensores: ${err.message}</div>`; });
 };
 document.head.appendChild(_cs);
+
+// ---- POSTURA / POBLACIÓN (Kajoo) ----
+const KAJOO_SHEET_ID = '2PACX-1vSV7IMBzTnRXgqDduBnXcAi1kqTW6D9lZafuwDZQeDDqF4ojc5z6tqfOCfHqt8mBp5XGSQjLkmaP9Us';
+const POSTURA_CSV   = `https://docs.google.com/spreadsheets/d/e/${KAJOO_SHEET_ID}/pub?gid=0&single=true&output=csv`;
+const MORTANDAD_CSV = `https://docs.google.com/spreadsheets/d/e/${KAJOO_SHEET_ID}/pub?gid=226147860&single=true&output=csv`;
+const POBLACION_CSV = `https://docs.google.com/spreadsheets/d/e/${KAJOO_SHEET_ID}/pub?gid=2026026974&single=true&output=csv`;
+const ALERT_DROP_PCT = 15; // % de caída vs promedio de los 3 días previos que dispara alerta
+
+function csvProxy(url){ return 'https://corsproxy.io/?' + encodeURIComponent(url); }
+
+// Normaliza el identificador de galpón ("Galpón 11", "11", "GALPON 11" ...) a una clave común
+function galponKey(v){
+  const m = String(v||'').match(/\d+/);
+  return m ? m[0] : String(v||'').trim();
+}
+function galponLabel(v){
+  const k = galponKey(v);
+  return k ? ('Galpón ' + k) : String(v||'');
+}
+// Normaliza fechas "D-M-YYYY" / "D/M/YYYY" (como las carga Ale a mano) a ISO YYYY-MM-DD.
+// Si ya viene en ISO (como la escribe el webhook), la deja igual.
+function normDate(v){
+  v = String(v||'').trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+  const m = v.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/);
+  if(m){
+    const d = m[1].padStart(2,'0'), mo = m[2].padStart(2,'0'), y = m[3];
+    return y + '-' + mo + '-' + d;
+  }
+  return v;
+}
+
+function loadPosturaData(){
+  if(!POSTURA_CSV || !MORTANDAD_CSV || !POBLACION_CSV){
+    const el = document.getElementById('postura-kpis');
+    if(el) el.innerHTML = `<div class="placeholder"><div class="ph-icon">🔧</div><div class="ph-title">Pestaña en configuración</div><div class="ph-sub">Faltan los links de la planilla de Kajoo</div></div>`;
+    return;
+  }
+  Promise.all([
+    loadData(POSTURA_CSV, true).catch(()=>loadData(csvProxy(POSTURA_CSV), false)),
+    loadData(MORTANDAD_CSV, true).catch(()=>loadData(csvProxy(MORTANDAD_CSV), false)),
+    loadData(POBLACION_CSV, true).catch(()=>loadData(csvProxy(POBLACION_CSV), false))
+  ]).then(([posturaText, mortText, poblText])=>{
+    const postura = parseCSV(posturaText).filter(r=>r.Fecha && r.Galpon);
+    const mortandad = parseCSV(mortText).filter(r=>r.Fecha && r.Galpon);
+    const poblacion = parseCSV(poblText).filter(r=>r.Galpon);
+    renderPostura(postura, mortandad, poblacion);
+  }).catch(err=>{
+    const el = document.getElementById('postura-kpis');
+    if(el) el.innerHTML = `<div style="color:#f87171;font-size:12px;padding:8px">Error cargando datos de postura: ${err.message}</div>`;
+  });
+}
+
+function poblacionVigente(galpon, fecha, poblacionMap, mortandadList){
+  const key = galponKey(galpon);
+  const p = poblacionMap[key];
+  if(!p) return null;
+  const inicial = parseFloat(p.Poblacion_Inicial)||0;
+  const fechaAlta = normDate(p.Fecha_Alta)||'0000-00-00';
+  const fechaNorm = normDate(fecha);
+  const muertas = mortandadList
+    .filter(m=>galponKey(m.Galpon)===key && normDate(m.Fecha)>=fechaAlta && normDate(m.Fecha)<=fechaNorm)
+    .reduce((s,m)=>s+(parseFloat(m.Muertas)||0),0);
+  return Math.max(inicial - muertas, 0);
+}
+
+function renderPostura(postura, mortandad, poblacion){
+  const poblacionMap = {};
+  poblacion.forEach(p=>{ poblacionMap[galponKey(p.Galpon)]=p; });
+
+  const byGalpon = {};
+  postura.forEach(r=>{
+    const key = galponKey(r.Galpon);
+    if(!byGalpon[key]) byGalpon[key]=[];
+    byGalpon[key].push({fecha:normDate(r.Fecha), huevos:parseFloat(r.Huevos)||0});
+  });
+  Object.values(byGalpon).forEach(arr=>arr.sort((a,b)=>a.fecha.localeCompare(b.fecha)));
+
+  const galpones = Object.keys(byGalpon).sort((a,b)=>parseInt(a)-parseInt(b));
+  const fechas = [...new Set(postura.map(r=>normDate(r.Fecha)))].sort();
+  const hoy = fechas[fechas.length-1];
+
+  const rows = [];
+  const alerts = [];
+  let totalHuevosHoy = 0, sumaPctHoy = 0, countPctHoy = 0, galponesEnAlerta = 0;
+  const galponCards = [];
+
+  galpones.forEach(g=>{
+    const serie = byGalpon[g];
+    serie.forEach((pt,i)=>{
+      const pobl = poblacionVigente(g, pt.fecha, poblacionMap, mortandad);
+      const pct = pobl ? (pt.huevos/pobl*100) : null;
+      const prev = serie[i-1];
+      const deltaPct = prev && prev.huevos>0 ? ((pt.huevos-prev.huevos)/prev.huevos*100) : null;
+      rows.push({fecha:pt.fecha, galpon:g, huevos:pt.huevos, poblacion:pobl, pct, deltaPct});
+    });
+
+    const last = serie[serie.length-1];
+    const prev3 = serie.slice(-4,-1);
+    const avg3 = prev3.length ? prev3.reduce((s,r)=>s+r.huevos,0)/prev3.length : null;
+    const pobl = last ? poblacionVigente(g, last.fecha, poblacionMap, mortandad) : null;
+    const pct = (last && pobl) ? (last.huevos/pobl*100) : null;
+    let alerta = false, caidaPct = null;
+    if(last && avg3 && avg3>0){
+      caidaPct = (avg3-last.huevos)/avg3*100;
+      if(caidaPct >= ALERT_DROP_PCT) alerta = true;
+    }
+    if(alerta){
+      galponesEnAlerta++;
+      alerts.push({galpon:g, fecha:last.fecha, caidaPct, huevos:last.huevos, avg3});
+    }
+    if(last){ totalHuevosHoy += last.huevos; }
+    if(pct!=null){ sumaPctHoy += pct; countPctHoy++; }
+
+    galponCards.push({galpon:g, huevos:last?last.huevos:0, pct, alerta});
+  });
+
+  const alertEl = document.getElementById('postura-alert');
+  if(alertEl){
+    if(alerts.length){
+      alertEl.innerHTML = `<div class="card" style="border-color:var(--red);background:rgba(248,113,113,0.08);margin-bottom:16px">
+        <div class="card-title" style="color:var(--red)">⚠ Alerta de caída de postura</div>
+        ${alerts.map(a=>`<div style="font-size:13px;margin-bottom:6px">
+          <b>${galponLabel(a.galpon)}</b>: ${fmtInt(a.huevos)} huevos el ${a.fecha} — <span class="c-red">${a.caidaPct.toFixed(1)}% por debajo</span> del promedio de los 3 días previos (${fmtInt(a.avg3)}).
+        </div>`).join('')}
+      </div>`;
+    } else {
+      alertEl.innerHTML = '';
+    }
+  }
+
+  const kpisEl = document.getElementById('postura-kpis');
+  if(kpisEl){
+    const pctProm = countPctHoy ? (sumaPctHoy/countPctHoy) : null;
+    kpisEl.innerHTML = `
+      <div class="kpi" style="--kpi-color:var(--accent)">
+        <div class="kpi-label">Total huevos hoy (${hoy||'—'})</div>
+        <div class="kpi-value">${fmtInt(totalHuevosHoy)}</div>
+        <div class="kpi-sub">suma de los ${galpones.length} galpones</div>
+      </div>
+      <div class="kpi" style="--kpi-color:var(--green)">
+        <div class="kpi-label">% Postura promedio planta</div>
+        <div class="kpi-value">${pctProm!=null?pctProm.toFixed(1)+'%':'—'}</div>
+        <div class="kpi-sub">sobre población vigente cargada</div>
+      </div>
+      <div class="kpi" style="--kpi-color:${galponesEnAlerta?'var(--red)':'var(--green)'}">
+        <div class="kpi-label">Galpones en alerta</div>
+        <div class="kpi-value">${galponesEnAlerta}</div>
+        <div class="kpi-sub">caída ≥ ${ALERT_DROP_PCT}% vs prom. 3 días</div>
+      </div>`;
+  }
+
+  const galEl = document.getElementById('postura-galpones');
+  if(galEl){
+    galEl.innerHTML = galponCards.map(c=>{
+      const color = c.alerta ? 'var(--red)' : 'var(--accent)';
+      return `<div class="kpi" style="--kpi-color:${color}">
+        <div class="kpi-label">${galponLabel(c.galpon)}${c.alerta?' ⚠':''}</div>
+        <div class="kpi-value">${fmtInt(c.huevos)} <span>huevos</span></div>
+        <div class="kpi-sub">${c.pct!=null? '<b>'+c.pct.toFixed(1)+'%</b> postura' : 'sin población cargada'}</div>
+      </div>`;
+    }).join('');
+  }
+
+  const tbody = document.getElementById('postura-tbody');
+  if(tbody){
+    tbody.innerHTML = [...rows].sort((a,b)=> b.fecha.localeCompare(a.fecha) || a.galpon.localeCompare(b.galpon)).slice(0,200).map(r=>{
+      const deltaTxt = r.deltaPct!=null ? (r.deltaPct>=0?'+':'')+r.deltaPct.toFixed(1)+'%' : '—';
+      const deltaCls = r.deltaPct!=null ? (r.deltaPct<= -ALERT_DROP_PCT ? 'c-red' : r.deltaPct<0 ? 'c-warn':'c-green') : '';
+      return `<tr>
+        <td>${r.fecha}</td>
+        <td style="text-align:left">${galponLabel(r.galpon)}</td>
+        <td>${fmtInt(r.huevos)}</td>
+        <td>${r.poblacion!=null?fmtInt(r.poblacion):'—'}</td>
+        <td>${r.pct!=null?r.pct.toFixed(1)+'%':'—'}</td>
+        <td class="${deltaCls}">${deltaTxt}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  renderPoblacionTab(poblacionMap, mortandad);
+}
+
+function renderPoblacionTab(poblacionMap, mortandad){
+  const tbody = document.getElementById('poblacion-tbody');
+  const galpones = Object.keys(poblacionMap).sort((a,b)=>parseInt(a)-parseInt(b));
+  if(tbody){
+    tbody.innerHTML = galpones.map(g=>{
+      const p = poblacionMap[g];
+      const inicial = parseFloat(p.Poblacion_Inicial)||0;
+      const fechaAlta = normDate(p.Fecha_Alta)||'';
+      const muertasAcum = mortandad.filter(m=>galponKey(m.Galpon)===g && normDate(m.Fecha)>=fechaAlta).reduce((s,m)=>s+(parseFloat(m.Muertas)||0),0);
+      const vigente = Math.max(inicial-muertasAcum,0);
+      const pctMort = inicial>0 ? (muertasAcum/inicial*100) : 0;
+      return `<tr>
+        <td style="text-align:left">${galponLabel(g)}</td>
+        <td style="text-align:left">${fechaAlta||'—'}</td>
+        <td>${fmtInt(inicial)}</td>
+        <td class="c-red">${fmtInt(muertasAcum)}</td>
+        <td class="c-accent">${fmtInt(vigente)}</td>
+        <td class="${pctMort>5?'c-red':''}">${pctMort.toFixed(1)}%</td>
+      </tr>`;
+    }).join('');
+  }
+
+  const mtbody = document.getElementById('mortandad-tbody');
+  if(mtbody){
+    mtbody.innerHTML = [...mortandad].map(m=>({...m, _fecha:normDate(m.Fecha)})).sort((a,b)=>b._fecha.localeCompare(a._fecha)).slice(0,40).map(m=>`
+      <tr><td>${m._fecha}</td><td style="text-align:left">${galponLabel(m.Galpon)}</td><td class="c-red">${fmtInt(parseFloat(m.Muertas)||0)}</td></tr>
+    `).join('');
+  }
+}
+
+loadPosturaData();
 </script>
 </body>
 </html>
+
