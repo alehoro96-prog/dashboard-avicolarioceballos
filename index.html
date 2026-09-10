@@ -150,23 +150,22 @@
   <!-- PANELS (dinámicos) -->
   <div id="dynamic-panels"></div>
 
-  <!-- TABS FIJOS: Postura / Población (independientes de la carga de clasificado) -->
+  <!-- TABS FIJOS: Postura / Población / Sensores (independientes de la carga de clasificado) -->
   <div class="tabs" style="margin-top:-12px">
     <button class="tab" onclick="showPanel('panel-postura', this)">Postura</button>
     <button class="tab" onclick="showPanel('panel-poblacion', this)">Población</button>
+    <button class="tab" onclick="showPanel('panel-sensores', this)">Sensores</button>
   </div>
 
   <!-- PANEL: POSTURA -->
   <div class="panel" id="panel-postura">
     <div id="postura-alert"></div>
-    <div class="section-label" style="margin-top:0">Postura — resumen de hoy</div>
-    <div id="postura-kpis" class="kpi-grid" style="margin-bottom:12px"></div>
-    <div class="section-label">Por galpón</div>
+    <div class="section-label" style="margin-top:0">Postura por galpón</div>
     <div id="postura-galpones" class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px"></div>
     <div class="section-label">Registro diario por galpón</div>
     <div class="card"><div class="table-wrap"><table><thead><tr>
       <th style="text-align:left">Fecha</th><th style="text-align:left">Galpón</th>
-      <th>Huevos</th><th>Población vigente</th><th>% Postura</th><th>Δ vs ayer</th>
+      <th>Huevos</th><th>Población vigente</th><th>% Postura</th><th>Δ vs ayer</th><th>Δ vs semana pasada</th>
     </tr></thead><tbody id="postura-tbody"></tbody></table></div></div>
     <div style="height:12px"></div>
   </div>
@@ -185,31 +184,34 @@
     <div style="height:12px"></div>
   </div>
 
-  <!-- SENSORES VS CLASIFICADO -->
-  <div class="section-label" style="margin-top:28px">Diferencia conteo — sensores vs clasificado</div>
-  <div id="sensores-kpis" class="kpi-grid" style="margin-bottom:12px"></div>
-  <div class="card" style="margin-bottom:12px">
-    <div class="card-title">Diferencia diaria en cajones (sensores − clasificado)</div>
-    <div id="sensores-chart-wrap" style="position:relative;width:100%;height:200px">
-      <canvas id="sensores-chart" role="img" aria-label="Línea de tendencia diferencia sensores vs clasificado"></canvas>
+  <!-- PANEL: SENSORES VS CLASIFICADO -->
+  <div class="panel" id="panel-sensores">
+    <div class="section-label" style="margin-top:0">Diferencia conteo — sensores vs clasificado</div>
+    <div id="sensores-kpis" class="kpi-grid" style="margin-bottom:12px"></div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">Diferencia diaria en cajones (sensores − clasificado)</div>
+      <div id="sensores-chart-wrap" style="position:relative;width:100%;height:200px">
+        <canvas id="sensores-chart" role="img" aria-label="Línea de tendencia diferencia sensores vs clasificado"></canvas>
+      </div>
+      <div class="trend-labels" id="sensores-labels"></div>
     </div>
-    <div class="trend-labels" id="sensores-labels"></div>
-  </div>
-  <div class="card">
-    <div class="card-title">Registro diario — sensores vs clasificado</div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th style="text-align:left">Fecha</th>
-          <th>Sensores (caj.)</th>
-          <th>Clasificado (caj.)</th>
-          <th>Diferencia (caj.)</th>
-          <th>Diferencia (u.)</th>
-          <th>% pérdida</th>
-        </tr></thead>
-        <tbody id="sensores-tbody"></tbody>
-      </table>
+    <div class="card">
+      <div class="card-title">Registro diario — sensores vs clasificado</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th style="text-align:left">Fecha</th>
+            <th>Sensores (caj.)</th>
+            <th>Clasificado (caj.)</th>
+            <th>Diferencia (caj.)</th>
+            <th>Diferencia (u.)</th>
+            <th>% pérdida</th>
+          </tr></thead>
+          <tbody id="sensores-tbody"></tbody>
+        </table>
+      </div>
     </div>
+    <div style="height:12px"></div>
   </div>
   <div style="height:36px"></div>
 
@@ -495,6 +497,10 @@ function showPanel(id, btn){
   if(panel) panel.classList.add('active');
   if(btn) btn.classList.add('active');
   requestAnimationFrame(()=>{
+    if(id === 'panel-sensores' && window._sensorsRows){
+      renderSensors(window._sensorsRows);
+      return;
+    }
     const trendEl = panel?.querySelector('[id^="trend-"]');
     const labelsEl = panel?.querySelector('[id^="labels-"]');
     if(!trendEl || !labelsEl) return;
@@ -839,7 +845,7 @@ _cs.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js';
 _cs.onload = ()=>{
   loadData(SENSORS_CSV, true)
     .catch(()=>loadData(SENSORS_PROXY, false))
-    .then(text=>{ const rows=parseSensorsCSV(text); requestAnimationFrame(()=>requestAnimationFrame(()=>renderSensors(rows))); })
+    .then(text=>{ const rows=parseSensorsCSV(text); window._sensorsRows=rows; requestAnimationFrame(()=>requestAnimationFrame(()=>renderSensors(rows))); })
     .catch(err=>{ if(document.getElementById('sensores-kpis')) document.getElementById('sensores-kpis').innerHTML=`<div style="color:#f87171;font-size:12px;padding:8px">Error cargando sensores: ${err.message}</div>`; });
 };
 document.head.appendChild(_cs);
@@ -877,7 +883,7 @@ function normDate(v){
 
 function loadPosturaData(){
   if(!POSTURA_CSV || !MORTANDAD_CSV || !POBLACION_CSV){
-    const el = document.getElementById('postura-kpis');
+    const el = document.getElementById('postura-galpones');
     if(el) el.innerHTML = `<div class="placeholder"><div class="ph-icon">🔧</div><div class="ph-title">Pestaña en configuración</div><div class="ph-sub">Faltan los links de la planilla de Kajoo</div></div>`;
     return;
   }
@@ -891,9 +897,22 @@ function loadPosturaData(){
     const poblacion = parseCSV(poblText).filter(r=>r.Galpon);
     renderPostura(postura, mortandad, poblacion);
   }).catch(err=>{
-    const el = document.getElementById('postura-kpis');
+    const el = document.getElementById('postura-galpones');
     if(el) el.innerHTML = `<div style="color:#f87171;font-size:12px;padding:8px">Error cargando datos de postura: ${err.message}</div>`;
   });
+}
+
+function addDays(iso, days){
+  const d = new Date(iso+'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate()+days);
+  return d.toISOString().slice(0,10);
+}
+function pctDelta(curr, prev){
+  if(prev==null || prev===0) return null;
+  return (curr-prev)/prev*100;
+}
+function findByDate(serie, fecha){
+  return serie.find(p=>p.fecha===fecha) || null;
 }
 
 function poblacionVigente(galpon, fecha, poblacionMap, mortandadList){
@@ -922,12 +941,9 @@ function renderPostura(postura, mortandad, poblacion){
   Object.values(byGalpon).forEach(arr=>arr.sort((a,b)=>a.fecha.localeCompare(b.fecha)));
 
   const galpones = Object.keys(byGalpon).sort((a,b)=>parseInt(a)-parseInt(b));
-  const fechas = [...new Set(postura.map(r=>normDate(r.Fecha)))].sort();
-  const hoy = fechas[fechas.length-1];
 
   const rows = [];
   const alerts = [];
-  let totalHuevosHoy = 0, sumaPctHoy = 0, countPctHoy = 0, galponesEnAlerta = 0;
   const galponCards = [];
 
   galpones.forEach(g=>{
@@ -936,8 +952,10 @@ function renderPostura(postura, mortandad, poblacion){
       const pobl = poblacionVigente(g, pt.fecha, poblacionMap, mortandad);
       const pct = pobl ? (pt.huevos/pobl*100) : null;
       const prev = serie[i-1];
-      const deltaPct = prev && prev.huevos>0 ? ((pt.huevos-prev.huevos)/prev.huevos*100) : null;
-      rows.push({fecha:pt.fecha, galpon:g, huevos:pt.huevos, poblacion:pobl, pct, deltaPct});
+      const deltaPct = prev ? pctDelta(pt.huevos, prev.huevos) : null;
+      const prevSemana = findByDate(serie, addDays(pt.fecha, -7));
+      const deltaSemPct = prevSemana ? pctDelta(pt.huevos, prevSemana.huevos) : null;
+      rows.push({fecha:pt.fecha, galpon:g, huevos:pt.huevos, poblacion:pobl, pct, deltaPct, deltaSemPct});
     });
 
     const last = serie[serie.length-1];
@@ -945,19 +963,20 @@ function renderPostura(postura, mortandad, poblacion){
     const avg3 = prev3.length ? prev3.reduce((s,r)=>s+r.huevos,0)/prev3.length : null;
     const pobl = last ? poblacionVigente(g, last.fecha, poblacionMap, mortandad) : null;
     const pct = (last && pobl) ? (last.huevos/pobl*100) : null;
+    const prevDia = last ? serie[serie.length-2] : null;
+    const deltaDiaPct = (last && prevDia) ? pctDelta(last.huevos, prevDia.huevos) : null;
+    const prevSemanaLast = last ? findByDate(serie, addDays(last.fecha, -7)) : null;
+    const deltaSemPct = (last && prevSemanaLast) ? pctDelta(last.huevos, prevSemanaLast.huevos) : null;
     let alerta = false, caidaPct = null;
     if(last && avg3 && avg3>0){
       caidaPct = (avg3-last.huevos)/avg3*100;
       if(caidaPct >= ALERT_DROP_PCT) alerta = true;
     }
     if(alerta){
-      galponesEnAlerta++;
       alerts.push({galpon:g, fecha:last.fecha, caidaPct, huevos:last.huevos, avg3});
     }
-    if(last){ totalHuevosHoy += last.huevos; }
-    if(pct!=null){ sumaPctHoy += pct; countPctHoy++; }
 
-    galponCards.push({galpon:g, huevos:last?last.huevos:0, pct, alerta});
+    galponCards.push({galpon:g, huevos:last?last.huevos:0, pct, alerta, deltaDiaPct, deltaSemPct});
   });
 
   const alertEl = document.getElementById('postura-alert');
@@ -974,25 +993,11 @@ function renderPostura(postura, mortandad, poblacion){
     }
   }
 
-  const kpisEl = document.getElementById('postura-kpis');
-  if(kpisEl){
-    const pctProm = countPctHoy ? (sumaPctHoy/countPctHoy) : null;
-    kpisEl.innerHTML = `
-      <div class="kpi" style="--kpi-color:var(--accent)">
-        <div class="kpi-label">Total huevos hoy (${hoy||'—'})</div>
-        <div class="kpi-value">${fmtInt(totalHuevosHoy)}</div>
-        <div class="kpi-sub">suma de los ${galpones.length} galpones</div>
-      </div>
-      <div class="kpi" style="--kpi-color:var(--green)">
-        <div class="kpi-label">% Postura promedio planta</div>
-        <div class="kpi-value">${pctProm!=null?pctProm.toFixed(1)+'%':'—'}</div>
-        <div class="kpi-sub">sobre población vigente cargada</div>
-      </div>
-      <div class="kpi" style="--kpi-color:${galponesEnAlerta?'var(--red)':'var(--green)'}">
-        <div class="kpi-label">Galpones en alerta</div>
-        <div class="kpi-value">${galponesEnAlerta}</div>
-        <div class="kpi-sub">caída ≥ ${ALERT_DROP_PCT}% vs prom. 3 días</div>
-      </div>`;
+  function deltaSpan(pct){
+    if(pct==null) return '<span style="color:var(--muted)">—</span>';
+    const cls = pct<= -ALERT_DROP_PCT ? 'c-red' : pct<0 ? 'c-warn' : 'c-green';
+    const txt = (pct>=0?'+':'')+pct.toFixed(1)+'%';
+    return `<span class="${cls}">${txt}</span>`;
   }
 
   const galEl = document.getElementById('postura-galpones');
@@ -1003,6 +1008,7 @@ function renderPostura(postura, mortandad, poblacion){
         <div class="kpi-label">${galponLabel(c.galpon)}${c.alerta?' ⚠':''}</div>
         <div class="kpi-value">${fmtInt(c.huevos)} <span>huevos</span></div>
         <div class="kpi-sub">${c.pct!=null? '<b>'+c.pct.toFixed(1)+'%</b> postura' : 'sin población cargada'}</div>
+        <div class="kpi-sub">día: ${deltaSpan(c.deltaDiaPct)} · semana: ${deltaSpan(c.deltaSemPct)}</div>
       </div>`;
     }).join('');
   }
@@ -1010,15 +1016,14 @@ function renderPostura(postura, mortandad, poblacion){
   const tbody = document.getElementById('postura-tbody');
   if(tbody){
     tbody.innerHTML = [...rows].sort((a,b)=> b.fecha.localeCompare(a.fecha) || a.galpon.localeCompare(b.galpon)).slice(0,200).map(r=>{
-      const deltaTxt = r.deltaPct!=null ? (r.deltaPct>=0?'+':'')+r.deltaPct.toFixed(1)+'%' : '—';
-      const deltaCls = r.deltaPct!=null ? (r.deltaPct<= -ALERT_DROP_PCT ? 'c-red' : r.deltaPct<0 ? 'c-warn':'c-green') : '';
       return `<tr>
         <td>${r.fecha}</td>
         <td style="text-align:left">${galponLabel(r.galpon)}</td>
         <td>${fmtInt(r.huevos)}</td>
         <td>${r.poblacion!=null?fmtInt(r.poblacion):'—'}</td>
         <td>${r.pct!=null?r.pct.toFixed(1)+'%':'—'}</td>
-        <td class="${deltaCls}">${deltaTxt}</td>
+        <td>${deltaSpan(r.deltaPct)}</td>
+        <td>${deltaSpan(r.deltaSemPct)}</td>
       </tr>`;
     }).join('');
   }
@@ -1060,4 +1065,3 @@ loadPosturaData();
 </script>
 </body>
 </html>
-
