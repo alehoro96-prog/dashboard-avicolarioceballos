@@ -190,6 +190,7 @@
   <div class="panel" id="panel-sensores">
     <div class="section-label" style="margin-top:0">Diferencia conteo — sensores vs clasificado</div>
     <div id="sensores-kpis" class="kpi-grid" style="margin-bottom:12px"></div>
+    <div class="filter-btns" id="sensores-month-tabs" style="margin-bottom:12px;flex-wrap:wrap"></div>
     <div class="card" style="margin-bottom:12px">
       <div class="card-title">Diferencia diaria en cajones (sensores − clasificado)</div>
       <div id="sensores-chart-wrap" style="position:relative;width:100%;height:200px">
@@ -360,7 +361,12 @@ function processData(raw){
       ]))
     };
   });
-  monthly.sort((a,b)=>a.mes.localeCompare(b.mes));
+  // Ordena cronológicamente (no alfabéticamente — "MM/YYYY" alfabético rompe entre años,
+  // ej "01/2027" quedaría antes que "12/2026")
+  monthly.sort((a,b)=>{
+    const [am,ay]=a.mes.split('/'); const [bm,by]=b.mes.split('/');
+    return (parseInt(ay,10)*12+parseInt(am,10)) - (parseInt(by,10)*12+parseInt(bm,10));
+  });
   return {daily, monthly};
 }
 
@@ -465,30 +471,46 @@ function updatePanels(daily, monthly){
     </tr></thead><tbody id="tbody-todo"></tbody></table></div></div>
   </div>`;
 
-  // Render all content — table excludes zeros, trend includes them
-  monthly.forEach(m=>{
-    const id='panel-'+m.mes.replace('/','_');
-    const allRows = dailyByMes[m.mes]||[];
-    const prodRows = allRows.filter(r=>!r.zeroDia);
-    renderKPIs(id, m, prodRows, '', '');
-    renderBars('bars-'+id, m, '');
-    renderTable('tbody-'+id, prodRows, '');
-  });
-  renderTable('tbody-todo', daily.filter(r=>!r.zeroDia));
+  // Solo renderizamos el panel activo (el mes más reciente) al cargar la página — los demás
+  // meses y "Todo el período" se renderizan recién cuando Ale hace click en esa pestaña.
+  // Con muchos meses de historial acumulado, renderizar TODO de una sola vez era lo que
+  // colgaba la pestaña Clasificado.
+  const mesesOrdenados = monthly.slice().reverse();
+  if(mesesOrdenados[0]){
+    const idActivo = 'panel-'+mesesOrdenados[0].mes.replace('/','_');
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      renderMonthPanel(idActivo, mesesOrdenados[0], dailyByMes);
+    }));
+  }
   renderMonthlySummary(monthly);
 
   // Last update badge
   document.getElementById('current-date').textContent =
     'Actualizado: ' + (daily[daily.length-1]?.fecha||'—');
+}
 
-  // Trends after layout — include zero days so graph shows real dips
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    monthly.slice().reverse().forEach((m,i)=>{
-      const id='panel-'+m.mes.replace('/','_');
-      renderTrend('trend-'+id,'labels-'+id, dailyByMes[m.mes]||[]);
-    });
-    renderTrend('trend-todo','labels-todo', daily||[]);
-  }));
+// Renderiza KPIs + barras + tabla + tendencia de UN panel de mes, y lo marca como ya
+// renderizado para no repetir el trabajo si Ale vuelve a esa pestaña más tarde.
+function renderMonthPanel(id, m, dailyByMes){
+  const panel = document.getElementById(id);
+  if(panel && panel.dataset.rendered) return;
+  const allRows = (dailyByMes || window._dailyByMes || {})[m.mes] || [];
+  const prodRows = allRows.filter(r=>!r.zeroDia);
+  renderKPIs(id, m, prodRows, '', '');
+  renderBars('bars-'+id, m, '');
+  renderTable('tbody-'+id, prodRows, '');
+  renderTrend('trend-'+id, 'labels-'+id, allRows);
+  if(panel) panel.dataset.rendered='1';
+}
+
+// Renderiza la pestaña "Todo el período" (la más pesada, todo el historial junto) solo
+// la primera vez que Ale la abre.
+function renderTodoPanel(daily){
+  const panel = document.getElementById('panel-todo');
+  if(panel && panel.dataset.rendered) return;
+  renderTable('tbody-todo', daily.filter(r=>!r.zeroDia));
+  renderTrend('trend-todo', 'labels-todo', daily||[]);
+  if(panel) panel.dataset.rendered='1';
 }
 
 // --- Tab switching ---
@@ -498,21 +520,19 @@ function showPanel(id, btn){
   const panel = document.getElementById(id);
   if(panel) panel.classList.add('active');
   if(btn) btn.classList.add('active');
-  requestAnimationFrame(()=>{
-    if(id === 'panel-sensores' && window._sensorsRows){
-      renderSensors(window._sensorsRows);
-      return;
-    }
-    const trendEl = panel?.querySelector('[id^="trend-"]');
-    const labelsEl = panel?.querySelector('[id^="labels-"]');
-    if(!trendEl || !labelsEl) return;
-    if(trendEl.id === 'trend-todo'){
-      renderTrend('trend-todo', 'labels-todo', window._DAILY||[]);
-    } else {
-      const mesKey = trendEl.id.replace('trend-panel-','').replace(/_/,'/');
-      renderTrend(trendEl.id, labelsEl.id, window._dailyByMes?.[mesKey]||[]);
-    }
-  });
+
+  if(id === 'panel-sensores'){
+    if(window._sensorsRows) renderSensors(window._sensorsRows);
+    return;
+  }
+  if(!panel || panel.dataset.rendered) return; // ya renderizado antes, no repetir el trabajo
+
+  if(id === 'panel-todo'){
+    requestAnimationFrame(()=>requestAnimationFrame(()=> renderTodoPanel(window._DAILY||[])));
+    return;
+  }
+  const m = window._monthly?.find(x => 'panel-'+x.mes.replace('/','_') === id);
+  if(m) requestAnimationFrame(()=>requestAnimationFrame(()=> renderMonthPanel(id, m, window._dailyByMes)));
 }
 
 // --- Filter: Total / Blanco / Color ---
@@ -741,6 +761,8 @@ loadData(CSV_DIRECT, true)
 const SENSORS_CSV    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQySZedeAsfxUZTzcrWdpH-AbYjXKucBLoAhyQKT_oE9TjEf5ak9ra2mV3frKs12vZ4GmOosGixdCoI/pub?gid=526269754&single=true&output=csv';
 const SENSORS_PROXY  = 'https://corsproxy.io/?' + encodeURIComponent(SENSORS_CSV);
 
+const MESES_LARGOS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
 function parseSensorsCSV(text){
   const lines = text.trim().split('\n');
   const rows = [];
@@ -757,19 +779,30 @@ function parseSensorsCSV(text){
     const clasificado=norm(cols[2]);
     const diferencia=norm(cols[3])||Math.round((sensores-clasificado)*100)/100;
     if(!fecha||sensores<=0) return;
-    rows.push({fecha,sensores,clasificado,diferencia});
+    // Fecha viene como D/M/YYYY (sin ceros a la izquierda) — agrupamos por mes calendario
+    const m = fecha.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    let mesKey='0000-00', mesLabel=fecha, sortKey='0';
+    if(m){
+      const dd=m[1].padStart(2,'0'), mm=m[2].padStart(2,'0'), yyyy=m[3];
+      mesKey = yyyy+'-'+mm;
+      sortKey = yyyy+mm+dd;
+      mesLabel = MESES_LARGOS[parseInt(mm,10)-1]+' '+yyyy;
+    }
+    rows.push({fecha,sensores,clasificado,diferencia,mesKey,mesLabel,sortKey});
   });
+  rows.sort((a,b)=>a.sortKey.localeCompare(b.sortKey));
   return rows;
 }
 
 function renderSensors(rows){
   if(!rows.length) return;
+  window._sensorsRows = rows;
   const avg = rows.reduce((s,r)=>s+r.diferencia,0)/rows.length;
   const last = rows[rows.length-1];
   const last7 = rows.slice(-7);
   const avg7 = last7.reduce((s,r)=>s+r.diferencia,0)/7;
 
-  // KPIs
+  // KPIs — siempre sobre el histórico completo, no cambian según el mes elegido abajo
   const kpisEl = document.getElementById('sensores-kpis');
   if(kpisEl) kpisEl.innerHTML=`
     <div class="kpi" style="--kpi-color:var(--red)">
@@ -788,7 +821,38 @@ function renderSensors(rows){
       <div class="kpi-sub">sobre <b>${rows.length} días</b> registrados</div>
     </div>`;
 
-  // Table
+  // Agrupar por mes calendario — por defecto mostramos solo el mes más reciente
+  const byMonth = {};
+  rows.forEach(r=>{ if(!byMonth[r.mesKey]) byMonth[r.mesKey]=[]; byMonth[r.mesKey].push(r); });
+  window._sensoresByMonth = byMonth;
+  const mesKeys = Object.keys(byMonth).sort();
+  const ultimoMes = mesKeys[mesKeys.length-1];
+  if(!window._sensoresMesActivo || !byMonth[window._sensoresMesActivo]){
+    window._sensoresMesActivo = ultimoMes;
+  }
+
+  const tabsEl = document.getElementById('sensores-month-tabs');
+  if(tabsEl){
+    tabsEl.innerHTML = mesKeys.slice().reverse().map(mk=>{
+      const active = mk===window._sensoresMesActivo ? ' active' : '';
+      return `<button class="ftab${active}" onclick="setSensoresMes('${mk}', this)">${byMonth[mk][0].mesLabel}</button>`;
+    }).join('');
+  }
+
+  renderSensoresMes(byMonth[window._sensoresMesActivo]||[], avg);
+}
+
+function setSensoresMes(mesKey, btn){
+  window._sensoresMesActivo = mesKey;
+  document.querySelectorAll('#sensores-month-tabs .ftab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const rows = window._sensorsRows||[];
+  const avg = rows.length ? rows.reduce((s,r)=>s+r.diferencia,0)/rows.length : 0;
+  renderSensoresMes((window._sensoresByMonth||{})[mesKey]||[], avg);
+}
+
+// Renderiza tabla + gráfico solo para las filas de UN mes (evita que el historial completo se amontone)
+function renderSensoresMes(rows, avg){
   const tbody = document.getElementById('sensores-tbody');
   if(tbody) tbody.innerHTML=[...rows].reverse().map(r=>{
     const pct=r.sensores>0?(r.diferencia/r.sensores*100).toFixed(1):0;
@@ -806,7 +870,7 @@ function renderSensors(rows){
   // Chart with Chart.js
   const wrap = document.getElementById('sensores-chart-wrap');
   const canvas = document.getElementById('sensores-chart');
-  if(!wrap||!canvas) return;
+  if(!wrap||!canvas||!rows.length) return;
   const W = wrap.offsetWidth||600;
   const H = 200;
   const dpr = window.devicePixelRatio||1;
